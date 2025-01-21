@@ -8,10 +8,15 @@ let productsData, usersData, reviewsData, companiesData = [];
 
 //получение данных
 async function getData() {
-   productsData = await getProducts();
-   usersData = await getUsers();
-   reviewsData = await getReviews();
-   companiesData = await getCompanies();
+   try {
+      productsData = await getProducts();
+      usersData = await getUsers();
+      reviewsData = await getReviews();
+      companiesData = await getCompanies();
+   } catch (error) {
+      console.error("Error getting data:", error);
+      throw error;
+   }
 }
 
 function mapToObject(array, className) {
@@ -21,29 +26,38 @@ function mapToObject(array, className) {
 //создание массивов экземпляров объектов
 let products, users, reviews, companies = [];
 async function mapDataToObjects() {
-   await getData();
-   products = mapToObject(productsData, Product);
-   users = mapToObject(usersData, User);
-   reviews = mapToObject(reviewsData, Review);
-   companies = mapToObject(companiesData, Company);
+   try {
+      await getData();
+      products = mapToObject(productsData, Product);
+      users = mapToObject(usersData, User);
+      reviews = mapToObject(reviewsData, Review);
+      companies = mapToObject(companiesData, Company);
+   } catch (error) {
+      console.error("Error processing data:", error);
+      throw error;
+   }
 }
 
 //объединение массивов
 async function combineData() {
-   await mapDataToObjects();
-   reviews.forEach((review) => {
-      review.user = users.find((user) => user.id === review.userId);
-   })
+   try {
+      await mapDataToObjects();
+      reviews.forEach((review) => {
+         review.user = users.find((user) => user.id === review.userId);
+      })
 
-   products.forEach((product) => {
-      product.reviews = reviews.filter((review) => product.reviewIds.includes(review.id));
-   })
+      products.forEach((product) => {
+         product.reviews = reviews.filter((review) => product.reviewIds.includes(review.id));
+      })
 
-   companies.forEach((company) => {
-      company.products = products.filter((product) => product.companyId === company.id);
-   })
-
-   return companies;
+      companies.forEach((company) => {
+         company.products = products.filter((product) => product.companyId === company.id);
+      })
+      return companies;
+   } catch (error) {
+      console.error("Error combining data:", error);
+      return [];
+   }
 }
 
 
